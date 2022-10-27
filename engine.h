@@ -1,57 +1,51 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <iostream>
-#include <QVector2D>
-#include <QVector3D>
 #include <QPainter>
-
+#include <iostream>
+#include <vector>
+#include <random>
+#include <eigen3/Eigen/Dense>
 #include <random>
 #include <vector>
 
+class Engine {
+ public:
+  struct Particle {
+    double mass;
+    Eigen::Vector3d position;
+    Eigen::Vector3d velocity;
+    Eigen::Vector3d acceleration;
 
-class Engine
-{
-public:
-    struct Particle {
-      double mass;
-      QVector3D v; // velocity of particle
-      QVector3D p;
+    Particle(double x, double y, double z, double vx, double vy, double vz, double mass): position(x, y, z), velocity(vx, vy, vz), mass(mass) {};
 
-      Particle(double x, double y, double vx, double vy, double mass): p(x, y, 0), v(vx, vy, 0), mass(mass) {}
+    bool operator==(const Engine::Particle& other) {
+      return this->velocity == other.velocity && this->position == other.position && this->acceleration == other.acceleration && this->mass == other.mass;
+    }
 
-      bool operator==(const Particle& other) {
-        return this->v == other.v && this->p == other.p && this->mass == other.mass;
-      }
+    bool operator!=(const Engine::Particle& other) {
+      return !(*this==other);
+    }
+  };
 
-      bool operator!=(const Particle& other) {
-        return !(*this==other);
-      }
-    };
+  Engine();
 
-    Engine();
+  void update();
+  double potential_energy(const Particle &particle);
+  Eigen::Vector3d acceleration(const Particle &particle);
+  void render(QPainter &);
+  void limit(Eigen::Vector3d&);
 
-    void update();
-    void render(QPainter &);
-    QVector3D force(Particle &particle);
+ private:
+  std::mt19937 gen();
+  std::uniform_real_distribution<double> rand_vx;
+  std::uniform_real_distribution<double> rand_vy;
+  std::uniform_real_distribution<double> rand_vz;
 
-private:
-    const size_t kSeed = 120000000;
-    const double dt = 0.01;
-    const size_t kCount = 100;
-    const double kWidth = 1000.;
-    const double kHeight = 1000.;
-    const double kVelocity = 50.;
+  #include "constants.inc"
 
-    const double kmass = 0.0000001;
-    const double sigma = 1.5;
-    const double epsilon = 5;
-
-    const double k1 = 4*epsilon*std::pow(sigma, 12);
-    const double k2 = 4*epsilon*std::pow(sigma, 6);
-
-    std::vector<Particle> particles;
-
+  std::vector<Particle> particles;
 };
+
 
 #endif // ENGINE_H
