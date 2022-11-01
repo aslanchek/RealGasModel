@@ -34,7 +34,7 @@ class Engine {
   double potential_energy(const Particle &particle);
   Eigen::Vector3d acceleration(const Particle &particle);
   void render(QPainter &);
-  void limit(Eigen::Vector3d&);
+  void limit(Particle&);
 
  private:
   std::mt19937 gen();

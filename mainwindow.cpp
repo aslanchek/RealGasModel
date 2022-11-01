@@ -5,7 +5,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->setupUi(this);
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::MainWindow_update);
-    timer->start(10);
+    timer->setInterval(1000/60);
+    timer->start();
 }
 
 MainWindow::~MainWindow() {
