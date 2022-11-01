@@ -2,7 +2,7 @@
 #define CONSTANTS_H
 
 const size_t kSeed_ = 130000001;
-const double dt_ = 0.0001;
+const double dt_ = 0.001;
 const size_t kCount_ = 100;
 const size_t kWSide_ = 500;
 const double kVelocity_ = 500.;
