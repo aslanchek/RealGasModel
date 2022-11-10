@@ -4,7 +4,8 @@ Controller::Controller(): engine(configs), window(sf::VideoMode(configs["side_si
   window.setFramerateLimit(configs["FPS"]);
 
   for(size_t i = 0; i != configs["count"]; ++i) {
-    images.emplace_back(sf::CircleShape(4));
+    images.emplace_back(sf::CircleShape(configs["particle_size"]));
+    images[i].setFillColor(sf::Color::Black);
   }
 }
 
@@ -15,7 +16,7 @@ void Controller::render() {
   window.clear(sf::Color::White);
 
   for(size_t i = 0; i != configs["count"]; ++i) {
-    images[i].setPosition(engine.particles[i].position[0], engine.particles[i].position[0]);
+    images[i].setPosition(engine.particles[i].position[0], engine.particles[i].position[1]);
     window.draw(images[i]);
   }
 
@@ -32,6 +33,7 @@ void Controller::eventHandler() {
 
 void Controller::update() {
   eventHandler();
+  engine.update();
 }
 
 void Controller::run() {
