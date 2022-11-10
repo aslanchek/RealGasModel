@@ -1,66 +1,32 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.1)
 
-project(RealGasModel VERSION 0.1 LANGUAGES CXX)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+project(2DRealGasModel)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+## this is for local library compiling
+#include_directories(extlibs/SFML/include/)
+#add_subdirectory(extlibs/SFML/)
 
-set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        constants.inc
-        engine.h
-        engine.cpp
-)
+#include_directories(extlibs/eigen/)
+#add_subdirectory(extlibs/eigen/)
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(RealGasModel
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET RealGasModel APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
-        add_library(RealGasModel SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(RealGasModel
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
+#find_library(SFML COMPONENTS system window graphics)
+#find_library(Eigen3 COMPONETS Dense)
+################################
 
-target_link_libraries(RealGasModel PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+find_library(SFML COMPONENTS system window graphics)
+find_library(Eigen3 COMPONENTS Dense)
+find_package(nlohmann_json COMPONENTS json)
 
-set_target_properties(RealGasModel PROPERTIES
-    MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
-)
+set(EXECUTABLE_NAME project)
 
-install(TARGETS RealGasModel
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+add_executable(${EXECUTABLE_NAME} src/main.cpp)
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(RealGasModel)
-endif()
+target_link_libraries(${EXECUTABLE_NAME} sfml-graphics sfml-window sfml-system)
+## for local library compiling
+#target_link_libraries(${EXECUTABLE_NAME} Eigen3::Eigen)
+#
+target_link_libraries(${EXECUTABLE_NAME} Eigen)
+target_link_libraries(${EXECUTABLE_NAME} nlohmann_json::nlohmann_json)
