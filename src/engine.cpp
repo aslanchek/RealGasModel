@@ -1,6 +1,6 @@
 #include "engine.h"
 
-Engine::Engine(nlohmann::json& configs): kSeed_(configs["seed"]), dt_(configs["dt"]), kCount_(configs["count"]),
+Engine::Engine(const nlohmann::json& configs): configs(configs), kSeed_(configs["seed"]), dt_(configs["dt"]), kCount_(configs["count"]),
                                           kWSide_(configs["side_size"]), kVelocity_(configs["velocity"]),
                                           kmass_(configs["mass"]), sigma_(configs["sigma"]), epsilon_(configs["epsilon"]), klim_(configs["potential_limit"])
 {
@@ -23,6 +23,9 @@ Engine::Engine(nlohmann::json& configs): kSeed_(configs["seed"]), dt_(configs["d
     }
     y += step;
   }
+
+ // particles.emplace_back(Particle(55, 50, 0, configs["velocity"], 0, 0, 1));
+ // particles.emplace_back(Particle(60, 50, 0, - static_cast<double>(configs["velocity"]), 0, 0, 1));
 }
 
 void Engine::limit(Particle& particle) {
@@ -38,7 +41,7 @@ Eigen::Vector3d Engine::acceleration(const Particle& particle) {
     if (ext != particle) {
       Eigen::Vector3d distance = ext.position - particle.position;
       if (distance.norm() < klim_) {
-        double acceleration_abs = (- 12*k1_/std::pow(distance.norm(), 13) - 6*k1_/std::pow(distance.norm(), 7)) / particle.mass;
+        double acceleration_abs = - (12*k1_/std::pow(distance.norm(), 13) - 6*k2_/std::pow(distance.norm(), 7)) / particle.mass;
         distance.normalize();
         acceleration_sum += distance * acceleration_abs;
       }
@@ -47,12 +50,20 @@ Eigen::Vector3d Engine::acceleration(const Particle& particle) {
   return acceleration_sum;
 }
 
+double Engine::getSystemKineticEnergy() {
+  double sumKineticEnergy = 0;
+  for(size_t i = 0; i != configs["count"]; ++i) {
+    sumKineticEnergy += particles[i].getKineticEnegry();
+  }
+  return sumKineticEnergy;
+}
+
 void Engine::update() {
   for(auto& current : particles) {
     current.acceleration = acceleration(current);
   }
   for(auto& current : particles) {
-    current.position += current.velocity * dt_/2; //move
+    current.position += current.velocity * dt_ + current.acceleration * (dt_*dt_ / 2) ; //move
   }
   for(auto& current : particles) {
     limit(current);
@@ -65,11 +76,5 @@ void Engine::update() {
   }
   for(auto& current : particles) {
     current.velocity += current.acceleration * dt_/2; //accelerate
-  }
-  for(auto& current : particles) {
-    current.position += current.velocity * dt_/2; //move
-  }
-  for(auto& current : particles) {
-    limit(current);
   }
 }

@@ -11,11 +11,13 @@ class Controller{
   void eventHandler();
   void update();
  private:
-  nlohmann::json configs = nlohmann::json::parse(std::ifstream("../src/conf.json"));
+  double time = 0;
+  const nlohmann::json configs = nlohmann::json::parse(std::ifstream("../src/conf.json"));
   Engine engine;
   sf::RenderWindow window;
   sf::Clock clock;
   std::vector<sf::CircleShape> images; // vector of images for each partile
 };
+
 
 #endif //INC_2DREALGASMODEL_SRC_CONTROLLER_H_
