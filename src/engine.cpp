@@ -1,11 +1,13 @@
 #include "engine.h"
 
-Engine::Engine() {
+Engine::Engine(nlohmann::json& configs): kSeed_(configs["seed"]), dt_(configs["dt"]), kCount_(configs["count"]),
+                                          kWSide_(configs["side_size"]), kVelocity_(configs["velocity"]),
+                                          kmass_(configs["mass"]), sigma_(configs["sigma"]), epsilon_(configs["epsilon"]), klim_(configs["potential_limit"])
+{
   std::mt19937 gen(kSeed_); // генератор случайных чисел, тут взят какой-то алгоритм mt19937
   std::uniform_real_distribution<double> rand_vx(-kVelocity_, kVelocity_); // uniform distribution - равномерное распределение на R, по умолчанию стоит double
   std::uniform_real_distribution<double> rand_vy(-kVelocity_, kVelocity_);
   std::uniform_real_distribution<double> rand_vz(-kVelocity_, kVelocity_);
-
 
   double step = kWSide_ / (std::sqrt(kCount_)+1);
 
@@ -15,7 +17,7 @@ Engine::Engine() {
   for (size_t k = 0; k != count; ++k) {
     double x = step;
     for (size_t m = 0; m != count; ++m) {
-      particles.push_back(Particle(x, y, 0, rand_vx(gen), rand_vy(gen),
+      particles.emplace_back(Particle(x, y, 0, rand_vx(gen), rand_vy(gen),
                                      0, kmass_));
       x += step;
     }
@@ -70,11 +72,4 @@ void Engine::update() {
   for(auto& current : particles) {
     limit(current);
   }
-}
-
-void Engine::render(QPainter &painter) {
-    for(auto curr : particles) {
-        double radius = 3;
-        painter.drawEllipse(curr.position[0] - radius/2, curr.position[1] - radius/2, radius, radius);
-    }
 }
