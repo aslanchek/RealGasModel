@@ -2,4 +2,5 @@
 
 int main() {
   Controller controller;
+  controller.run();
 }

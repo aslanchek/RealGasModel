@@ -4,9 +4,17 @@
 
 class Controller{
  public:
-  std::ifstream file("./conf.json");
-  nlohmann::json configs = nlohmann::json::parse(file);
-  Engine engine(configs);
+  Controller();
+  void run();
+  void render();
+  void eventHandler();
+  void update();
+ private:
+  nlohmann::json configs = nlohmann::json::parse(std::ifstream("../src/conf.json"));
+  Engine engine;
+  sf::RenderWindow window;
+  sf::Clock clock;
+  std::vector<sf::CircleShape> images; // vector of images for each partile
 };
 
 #endif //INC_2DREALGASMODEL_SRC_CONTROLLER_H_

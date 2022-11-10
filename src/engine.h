@@ -8,8 +8,8 @@
 #include <eigen3/Eigen/Dense>
 #include <random>
 #include <vector>
+#include <SFML/Graphics.hpp>
 #include <nlohmann/json.hpp>
-
 
 class Engine {
  public:
@@ -29,13 +29,15 @@ class Engine {
       return !(*this==other);
     }
   };
-
+  Engine() = default;
   Engine(nlohmann::json&);
 
   void update();
   double potential_energy(const Particle &particle);
   Eigen::Vector3d acceleration(const Particle &particle);
   void limit(Particle&);
+
+  std::vector<Particle> particles;
 
  private:
   const size_t kSeed_;
@@ -52,7 +54,5 @@ class Engine {
 
   const double k1_ = 4 * epsilon_ * std::pow(sigma_, 12);
   const double k2_ = 4 * epsilon_ * std::pow(sigma_, 6);
-
-  std::vector<Particle> particles;
 };
 #endif // ENGINE_H
