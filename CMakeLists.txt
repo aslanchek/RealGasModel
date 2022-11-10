@@ -12,13 +12,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #include_directories(extlibs/eigen/)
 #add_subdirectory(extlibs/eigen/)
 
+#include_directories(extlibs/json/single_include)
+#add_subdirectory(extlibs/json/)
+
 #find_library(SFML COMPONENTS system window graphics)
 #find_library(Eigen3 COMPONETS Dense)
-################################
+#find_library(nlohmann_json COMPONENTS json)
+##
 
+## this is for library installed in system
 find_library(SFML COMPONENTS system window graphics)
 find_library(Eigen3 COMPONENTS Dense)
 find_package(nlohmann_json COMPONENTS json)
+##
 
 set(EXECUTABLE_NAME project)
 
