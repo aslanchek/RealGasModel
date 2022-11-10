@@ -19,9 +19,7 @@ object_script.*.Debug
 *.pro.user
 *.pro.user.*
 *.qbs.user
-*.qbs.user.*
-*.moc
-moc_*.cpp
+*.qbs.user.* *.moc moc_*.cpp
 moc_*.h
 qrc_*.cpp
 ui_*.h
@@ -52,3 +50,5 @@ compile_commands.json
 *creator.user*
 
 build/*
+
+.idea/*
