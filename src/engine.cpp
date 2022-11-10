@@ -23,7 +23,6 @@ Engine::Engine(nlohmann::json& configs): kSeed_(configs["seed"]), dt_(configs["d
     }
     y += step;
   }
-  std::cout << "engine ctor" << '\n';
 }
 
 void Engine::limit(Particle& particle) {

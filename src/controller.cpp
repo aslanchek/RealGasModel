@@ -1,4 +1,5 @@
 #include "controller.h"
+#include <rapidcsv.h>
 
 Controller::Controller(): engine(configs), window(sf::VideoMode(configs["side_size"], configs["side_size"]), "Title") {
   window.setFramerateLimit(configs["FPS"]);
@@ -11,7 +12,7 @@ Controller::Controller(): engine(configs), window(sf::VideoMode(configs["side_si
 
 void Controller::render() {
   double current_time = clock.restart().asSeconds();
-  window.setTitle(std::to_string(1.0 / current_time));
+  window.setTitle("FPS: " + std::to_string((int)(1.0 / current_time)));
 
   window.clear(sf::Color::White);
 
@@ -29,6 +30,10 @@ void Controller::eventHandler() {
     if (event.type == sf::Event::Closed)
       window.close();
   }
+}
+
+void Controller::log() {
+
 }
 
 void Controller::update() {

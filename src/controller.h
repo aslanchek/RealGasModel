@@ -7,6 +7,7 @@ class Controller{
   Controller();
   void run();
   void render();
+  void log();
   void eventHandler();
   void update();
  private:

@@ -28,8 +28,10 @@ find_package(nlohmann_json COMPONENTS json)
 
 set(EXECUTABLE_NAME executable)
 set(SOURCES src/main.cpp src/controller.h src/controller.cpp src/engine.h src/engine.cpp)
+set(EXTLIBS extlibs/rapidcsv.h)
+include_directories(extlibs/)
 
-add_executable(${EXECUTABLE_NAME} ${SOURCES})
+add_executable(${EXECUTABLE_NAME} ${EXTLIBS} ${SOURCES})
 
 target_link_libraries(${EXECUTABLE_NAME} sfml-graphics sfml-window sfml-system)
 ## for local library compiling
