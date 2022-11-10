@@ -21,18 +21,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ##
 
 ## this is for library installed in system
-find_library(SFML COMPONENTS system window graphics)
-find_library(Eigen3 COMPONENTS Dense)
+find_package(SFML COMPONENTS system window graphics)
+find_package(Eigen3 COMPONENTS Dense)
 find_package(nlohmann_json COMPONENTS json)
 ##
 
-set(EXECUTABLE_NAME project)
+set(EXECUTABLE_NAME executable)
+set(SOURCES src/main.cpp src/controller.h src/controller.cpp src/engine.h src/engine.cpp)
 
-add_executable(${EXECUTABLE_NAME} src/main.cpp)
+add_executable(${EXECUTABLE_NAME} ${SOURCES})
 
 target_link_libraries(${EXECUTABLE_NAME} sfml-graphics sfml-window sfml-system)
 ## for local library compiling
 #target_link_libraries(${EXECUTABLE_NAME} Eigen3::Eigen)
 #
-target_link_libraries(${EXECUTABLE_NAME} Eigen)
+target_link_libraries(${EXECUTABLE_NAME} Eigen3::Eigen)
 target_link_libraries(${EXECUTABLE_NAME} nlohmann_json::nlohmann_json)
