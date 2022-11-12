@@ -1,13 +1,13 @@
 {
-  "FPS": 300,
-  "particle_size": 0.6,
-  "seed": 1200000,
-  "dt": 0.00001,
+  "FPS": 3000,
+  "particle_size": 0.4,
+  "seed": 1200001,
+  "dt": 0.0001,
   "count": 36,
   "side_size": 100,
-  "velocity": 100,
+  "velocity": 1000,
   "mass": 1,
-  "epsilon": 1,
-  "sigma": 1,
-  "potential_limit": 4
+  "epsilon": 3,
+  "sigma": 5,
+  "potential_limit": 15
 }

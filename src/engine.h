@@ -11,11 +11,12 @@
 #include <nlohmann/json.hpp>
 #include <rapidcsv.h>
 #include <cstdlib>
+#include <algorithm>
 
 class Logger {
  public:
   template<typename Text, typename Value>
-  static void log(const Text& t, const Value& h) {
+  static void log(const Text &t, const Value &h) {
     std::cout << "[ " << t << " ] " << h << '\n';
   }
 };
@@ -28,14 +29,16 @@ class Engine {
     Eigen::Vector3d velocity;
     Eigen::Vector3d acceleration;
 
-    Particle(double x, double y, double z, double vx, double vy, double vz, double mass): position(x, y, z), velocity(vx, vy, vz), mass(mass) {};
+    Particle(double x, double y, double z, double vx, double vy, double vz, double mass) :
+        position(x, y, z), velocity(vx, vy, vz), mass(mass) {};
 
-    bool operator==(const Engine::Particle& other) {
-      return this->velocity == other.velocity && this->position == other.position && this->acceleration == other.acceleration && this->mass == other.mass;
+    bool operator==(const Engine::Particle &other) {
+      return this->velocity == other.velocity &&
+          this->position == other.position && this->acceleration == other.acceleration && this->mass == other.mass;
     }
 
-    bool operator!=(const Engine::Particle& other) {
-      return !(*this==other);
+    bool operator!=(const Engine::Particle &other) {
+      return !(*this == other);
     }
 
     double getKineticEnegry() {
@@ -43,17 +46,15 @@ class Engine {
     }
   };
   Engine() = default;
-  Engine(const nlohmann::json&);
+  Engine(const nlohmann::json &);
 
   std::vector<Particle> particles;
 
-  Eigen::Vector3d acceleration(const Particle &particle);
-  void limit(Particle&);
+  Eigen::Vector3d acceleration(const Engine::Particle &particle);
+  void limit(Engine::Particle &);
   double getSystemPotentialEnergy();
   double getSystemKineticEnergy();
-
   void update();
-
  private:
   const nlohmann::json configs;
   const size_t kSeed_;
