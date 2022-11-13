@@ -1,22 +1,25 @@
-#ifndef INC_2DREALGASMODEL_SRC_CONTROLLER_H_
-#define INC_2DREALGASMODEL_SRC_CONTROLLER_H_
+#ifndef INC_SFMLREALGASMODEL_SRC_CONTROLLER_H_
+#define INC_SFMLREALGASMODEL_SRC_CONTROLLER_H_
+
 #include "engine.h"
+#include "visualisation.h"
+#include "logger.h"
+
+#include <nlohmann/json.hpp>
 
 class Controller {
  public:
   Controller();
-  void render();
   void log();
-  void eventHandler();
   void update();
   void run();
  private:
-  double time = 0;
+  bool isOpen;
   const nlohmann::json configs = nlohmann::json::parse(std::ifstream("../src/conf.json"));
   Engine engine;
-  sf::RenderWindow window;
-  sf::Clock clock;
-  std::vector<sf::CircleShape> images; // vector of images for each partile
+  Logger position_logger;
+  //Visualizer visualizer;
+
 };
 
 #endif //INC_2DREALGASMODEL_SRC_CONTROLLER_H_
