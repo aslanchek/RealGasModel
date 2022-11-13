@@ -7,8 +7,8 @@
 
 class Logger {
  public:
-  Logger(std::string, const size_t&);
-  Logger(std::string, const std::vector<std::string>&);
+  Logger(std::string, const size_t &);
+  Logger(std::string, const std::vector<std::string> &);
   void log(const std::vector<double> &);
  private:
   rapidcsv::Document data_;
