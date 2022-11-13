@@ -6,20 +6,13 @@
 #include <vector>
 #include <random>
 #include <cmath>
-#include <eigen3/Eigen/Dense>
-#include <SFML/Graphics.hpp>
 #include <nlohmann/json.hpp>
-#include <rapidcsv.h>
+#include <eigen3/Eigen/Dense>
 #include <cstdlib>
 #include <algorithm>
 
-class Logger {
- public:
-  template<typename Text, typename Value>
-  static void log(const Text &t, const Value &h) {
-    std::cout << "[ " << t << " ] " << h << '\n';
-  }
-};
+#include <omp.h>
+
 
 class Engine {
  public:
@@ -50,6 +43,8 @@ class Engine {
 
   std::vector<Particle> particles;
 
+  double getTime();
+
   Eigen::Vector3d acceleration(const Engine::Particle &particle);
   void limit(Engine::Particle &);
   double getSystemPotentialEnergy();
@@ -60,7 +55,7 @@ class Engine {
   const size_t kSeed_;
   const double dt_;
   const size_t kCount_;
-  const size_t kWSide_;
+  const size_t kWSize_;
   const double kVelocity_;
   const double kmass_;
 

@@ -1,8 +1,0 @@
-//
-// Created by aslanchek on 11/12/22.
-//
-
-#ifndef SFMLREALGASMODEL_SRC_RENDER_H_
-#define SFMLREALGASMODEL_SRC_RENDER_H_
-
-#endif //SFMLREALGASMODEL_SRC_RENDER_H_

@@ -1,16 +1,21 @@
 #include "engine.h"
 
-Engine::Engine(const nlohmann::json &configs) : configs(configs), kSeed_(configs["seed"]),
-                                                dt_(configs["dt"]), kCount_(configs["count"]),
-                                                kWSide_(configs["side_size"]), kVelocity_(configs["velocity"]),
-                                                kmass_(configs["mass"]), sigma_(configs["sigma"]),
-                                                epsilon_(configs["epsilon"]), klim_(configs["potential_limit"]) {
+Engine::Engine(const nlohmann::json &configs) : configs(configs),
+                                                kSeed_(configs["seed"]),
+                                                dt_(configs["dt"]),
+                                                kCount_(configs["count"]),
+                                                kWSize_(configs["simulation_side_size"]),
+                                                kVelocity_(configs["velocity"]),
+                                                kmass_(configs["mass"]),
+                                                sigma_(configs["sigma"]),
+                                                epsilon_(configs["epsilon"]),
+                                                klim_(configs["potential_limit"]) {
   std::mt19937 gen(kSeed_);
   std::uniform_real_distribution<double> rand_vx(-kVelocity_, kVelocity_);
   std::uniform_real_distribution<double> rand_vy(-kVelocity_, kVelocity_);
   std::uniform_real_distribution<double> rand_vz(-kVelocity_, kVelocity_);
 
-  double step = kWSide_ / (std::sqrt(kCount_) + 1);
+  double step = static_cast<double>(kWSize_) / (std::sqrt(kCount_) + 1);
 
   int count = static_cast<int>(std::sqrt(kCount_));
 
@@ -25,19 +30,25 @@ Engine::Engine(const nlohmann::json &configs) : configs(configs), kSeed_(configs
   }
 }
 
+double Engine::getTime() {
+  return time_;
+}
+
 Eigen::Vector3d Engine::acceleration(const Engine::Particle &particle) {
   Eigen::Vector3d acceleration_sum(0, 0, 0);
   std::vector<Engine::Particle> particles_copy = particles;
 
   Eigen::Vector3d shift =
-      Eigen::Vector3d(static_cast<double>(kWSide_) / 2, static_cast<double>(kWSide_) / 2, 0) - particle.position;
+      Eigen::Vector3d(static_cast<double>(kWSize_) / 2, static_cast<double>(kWSize_) / 2, 0) - particle.position;
 
-  for (auto &tmp : particles_copy) {
-    tmp.position += shift;
+#pragma omp parallel for
+  for (int i = 0; i < particles_copy.size(); i++) {
+    particles_copy[i].position += shift;
   }
 
-  for (auto &tmp : particles_copy) {
-    limit(tmp);
+#pragma omp parallel for
+  for (int i = 0; i < particles_copy.size(); i++) {
+    limit(particles_copy[i]);
   }
 
   for (auto &ext : particles_copy) {
@@ -54,7 +65,7 @@ Eigen::Vector3d Engine::acceleration(const Engine::Particle &particle) {
 
 void Engine::limit(Engine::Particle &particle) {
   for (int i = 0; i != 3; ++i) {
-    particle.position[i] = std::abs(std::fmod(particle.position[i] + static_cast<double>(kWSide_), kWSide_));
+    particle.position[i] = std::abs(std::fmod(particle.position[i] + static_cast<double>(kWSize_), kWSize_));
   }
 }
 
@@ -67,8 +78,10 @@ double Engine::getSystemKineticEnergy() {
 }
 
 void Engine::update() {
-  for (auto &current : particles) {
-    current.acceleration = acceleration(current);
+
+#pragma omp parallel for
+  for (int i = 0; i < particles.size(); i++) {
+    particles[i].acceleration = acceleration(particles[i]);
   }
   for (auto &current : particles) {
     current.position += current.velocity * dt_ + current.acceleration * (dt_ * dt_ / 2); //move
@@ -79,10 +92,12 @@ void Engine::update() {
   for (auto &current : particles) {
     current.velocity += current.acceleration * dt_ / 2; //accelerate
   }
-  for (auto &current : particles) {
-    current.acceleration = acceleration(current); //reestimate acceleration
+#pragma omp parallel for
+  for (int i = 0; i < particles.size(); i++) {
+    particles[i].acceleration = acceleration(particles[i]);
   }
   for (auto &current : particles) {
     current.velocity += current.acceleration * dt_ / 2; //accelerate
   }
+  time_ += dt_;
 }

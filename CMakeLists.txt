@@ -5,6 +5,10 @@ project(SFMLRealGasModel
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_compile_options(-O3 -march=native) # CMake 2.8.12 or newer
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -fopenmp" )
+set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+## set(CMAKE_CXX_FLAGS )
 
 ## this is for local library compiling
 #include_directories(extlibs/SFML/include/)
@@ -25,18 +29,28 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(SFML COMPONENTS system window graphics)
 find_package(Eigen3 COMPONENTS Dense)
 find_package(nlohmann_json COMPONENTS json)
+find_package(nlohman COMPONENTS json)
+find_package(fmt)
 ##
 
 set(EXECUTABLE_NAME executable)
-set(SOURCES src/main.cpp src/controller.h src/controller.cpp src/engine.h src/engine.cpp)
+set(SOURCES
+        src/main.cpp
+        src/controller.h
+        src/controller.cpp
+        src/engine.h
+        src/engine.cpp
+        src/logger.h
+        src/logger.cpp
+        src/visualisation.h
+        src/visualisation.cpp)
+
 set(EXTLIBS extlibs/rapidcsv.h)
 include_directories(extlibs/)
 
 add_executable(${EXECUTABLE_NAME} ${EXTLIBS} ${SOURCES})
 
 target_link_libraries(${EXECUTABLE_NAME} sfml-graphics sfml-window sfml-system)
-## for local library compiling
-#target_link_libraries(${EXECUTABLE_NAME} Eigen3::Eigen)
-#
 target_link_libraries(${EXECUTABLE_NAME} Eigen3::Eigen)
 target_link_libraries(${EXECUTABLE_NAME} nlohmann_json::nlohmann_json)
+target_link_libraries(${EXECUTABLE_NAME} fmt::fmt)
