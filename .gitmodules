@@ -1,0 +1,12 @@
+[submodule "extlibs/json"]
+	path = extlibs/json
+	url = git@github.com:nlohmann/json.git
+[submodule "extlibs/SFML"]
+	path = extlibs/SFML
+	url = git@github.com:SFML/SFML.git
+[submodule "extlibs/fmt"]
+	path = extlibs/fmt
+	url = git@github.com:fmtlib/fmt.git
+[submodule "extlibs/eigen"]
+	path = extlibs/eigen
+	url = https://gitlab.com/libeigen/eigen.git

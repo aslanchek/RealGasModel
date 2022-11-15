@@ -26,7 +26,7 @@ set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS
 ##
 
 ## this is for library installed in system
-find_package(SFML COMPONENTS system window graphics)
+#find_package(SFML COMPONENTS system window graphics)
 find_package(Eigen3 COMPONENTS Dense)
 find_package(nlohmann_json COMPONENTS json)
 find_package(nlohman COMPONENTS json)
