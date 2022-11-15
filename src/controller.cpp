@@ -1,8 +1,7 @@
 #include "controller.h"
 
 Controller::Controller()
-    : isOpen(true),
-      engine(configs),
+    : engine(configs),
       position_logger("../data/position_data.csv", static_cast<size_t>(configs["count"])),
       velocity_logger("../data/velocity_data.csv", static_cast<size_t>(configs["count"])),
       energy_logger("../data/energy_data.csv", std::vector<std::string>{"Kinetic Energy", "Potential Energy"}) {};
@@ -24,11 +23,11 @@ void Controller::update() {
 }
 
 void Controller::run() {
-  for (unsigned long long i = 0; i < configs["steps"]; i++) {
+  for (size_t i = 0; i < (size_t)configs["steps"]; i++) {
     update();
-    if (i % 500 == 0) {
+    if (i % (size_t)configs["log_step"] == 0) {
       std::system("clear");
-      printf("%d%s\n", (int) ((float) i / (float) configs["steps"] * 100), "%");
+      printf("%s%.2f%s\n", "completed: ", ((float) i / (float) configs["steps"] * 100 + 1.f), "%");
       log();
     }
   }
