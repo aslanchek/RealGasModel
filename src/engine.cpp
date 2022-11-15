@@ -26,7 +26,7 @@ Engine::Engine(const nlohmann::json &configs) : configs(configs),
 //      double x = step;
 //      for (size_t m = 0; m != count; ++m) {
 //        particles.push_back(Particle(x, y, z, rand_vx(gen), rand_vy(gen),
-//                                     0 /*rand_vz(gen)*/, kmass_));
+//                                      rand_vz(gen), kmass_));
 //        x += step;
 //      }
 //      y += step;
@@ -60,12 +60,12 @@ Eigen::Vector3d Engine::acceleration(const Engine::Particle &particle) {
   Eigen::Vector3d shift =
       Eigen::Vector3d(static_cast<double>(kWSize_) / 2, static_cast<double>(kWSize_) / 2, 0) - particle.position;
 
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(4)
   for (int i = 0; i < particles_copy.size(); ++i) {
     particles_copy[i].position += shift;
   }
 
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(4)
   for (int i = 0; i < particles_copy.size(); ++i) {
     limit(particles_copy[i]);
   }
@@ -111,27 +111,27 @@ double Engine::getSystemPotentialEnergy() {
 }
 
 void Engine::update() {
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(4)
   for (int i = 0; i < particles.size(); i++) {
     particles[i].acceleration = acceleration(particles[i]);
   }
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(4)
   for (auto &current : particles) {
     current.position += current.velocity * dt_ + current.acceleration * (dt_ * dt_ / 2); //move
   }
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(4)
   for (auto &current : particles) {
     limit(current);
   }
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(4)
   for (auto &current : particles) {
     current.velocity += current.acceleration * dt_ / 2; //accelerate
   }
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(4)
   for (int i = 0; i < particles.size(); i++) {
     particles[i].acceleration = acceleration(particles[i]);
   }
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(4)
   for (auto &current : particles) {
     current.velocity += current.acceleration * dt_ / 2; //accelerate
   }

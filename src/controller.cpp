@@ -24,10 +24,12 @@ void Controller::update() {
 
 void Controller::run() {
   for (size_t i = 0; i < (size_t)configs["steps"]; i++) {
+    clock_t start = clock();
     update();
+    clock_t end = clock();
+    double elapsed = (double)(end - start)/(double)(CLOCKS_PER_SEC);
     if (i % (size_t)configs["log_step"] == 0) {
-      std::system("clear");
-      printf("%s%.2f%s\n", "completed: ", ((float) i / (float) configs["steps"] * 100 + 1.f), "%");
+      printf("completed: %.2f%s\nremaining: %.f hours\n", (float) i / (float) configs["steps"] * 100 + 1.f, "%", ((size_t) configs["steps"] - i) * elapsed);
       log();
     }
   }
