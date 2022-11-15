@@ -30,7 +30,7 @@ Engine::Engine(const nlohmann::json &configs) : configs(configs),
   }
 }
 
-double Engine::getTime() {
+double Engine::getTime() const {
   return time_;
 }
 
@@ -41,21 +41,27 @@ Eigen::Vector3d Engine::acceleration(const Engine::Particle &particle) {
   Eigen::Vector3d shift =
       Eigen::Vector3d(static_cast<double>(kWSize_) / 2, static_cast<double>(kWSize_) / 2, 0) - particle.position;
 
-#pragma omp parallel for
-  for (int i = 0; i < particles_copy.size(); i++) {
+  #pragma omp parallel for num_threads(8)
+  for (int i = 0; i < particles_copy.size(); ++i) {
     particles_copy[i].position += shift;
   }
 
-#pragma omp parallel for
-  for (int i = 0; i < particles_copy.size(); i++) {
+  #pragma omp parallel for num_threads(8)
+  for (int i = 0; i < particles_copy.size(); ++i) {
     limit(particles_copy[i]);
   }
 
   for (auto &ext : particles_copy) {
     Eigen::Vector3d distance = ext.position - (particle.position + shift);
     if (distance.norm() < klim_ && distance.norm() > 0) {
+
+      double part1 = k1_ / std::pow(distance.norm(), 12);
+      double part2 = k2_ / std::pow(distance.norm(), 6);
+
+      calcSystemPotentionEnergy(part1, part2);
+
       double acceleration_abs =
-          -(12 * k1_ / std::pow(distance.norm(), 13) - 6 * k2_ / std::pow(distance.norm(), 7)) / particle.mass;
+          -(12 * part1 / distance.norm() - 6 * part2 / distance.norm()) / particle.mass;
       distance.normalize();
       acceleration_sum += distance * acceleration_abs;
     }
@@ -69,6 +75,10 @@ void Engine::limit(Engine::Particle &particle) {
   }
 }
 
+double Engine::calcSystemPotentionEnergy(const double& part1, const double& part2) {
+  return part1 - part2;
+}
+
 double Engine::getSystemKineticEnergy() {
   double sumKineticEnergy = 0;
   for (size_t i = 0; i != kCount_; ++i) {
@@ -77,25 +87,32 @@ double Engine::getSystemKineticEnergy() {
   return sumKineticEnergy;
 }
 
-void Engine::update() {
+double Engine::getSystemPotentialEnergy() {
+  return SystemPotentialEnergy / 2;
+}
 
-#pragma omp parallel for
+void Engine::update() {
+  #pragma omp parallel for num_threads(8)
   for (int i = 0; i < particles.size(); i++) {
     particles[i].acceleration = acceleration(particles[i]);
   }
+  #pragma omp parallel for num_threads(8)
   for (auto &current : particles) {
     current.position += current.velocity * dt_ + current.acceleration * (dt_ * dt_ / 2); //move
   }
+  #pragma omp parallel for num_threads(8)
   for (auto &current : particles) {
     limit(current);
   }
+  #pragma omp parallel for num_threads(8)
   for (auto &current : particles) {
     current.velocity += current.acceleration * dt_ / 2; //accelerate
   }
-#pragma omp parallel for
+  #pragma omp parallel for num_threads(8)
   for (int i = 0; i < particles.size(); i++) {
     particles[i].acceleration = acceleration(particles[i]);
   }
+  #pragma omp parallel for num_threads(8)
   for (auto &current : particles) {
     current.velocity += current.acceleration * dt_ / 2; //accelerate
   }

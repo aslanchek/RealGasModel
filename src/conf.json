@@ -5,10 +5,11 @@
   "window_side_size": 1000,
   "seed": 1200001,
   "dt": 0.0001,
+  "steps": 100000,
   "count": 961,
-  "velocity": 100,
+  "velocity": 1,
   "mass": 1,
-  "epsilon": 3,
-  "sigma": 5,
-  "potential_limit": 15
+  "epsilon": 1,
+  "sigma": 1,
+  "potential_limit": 4
 }

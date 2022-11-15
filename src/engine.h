@@ -38,19 +38,22 @@ class Engine {
       return mass * std::pow(velocity.norm(), 2) / 2;
     }
   };
-  Engine() = default;
+
   Engine(const nlohmann::json &);
 
   std::vector<Particle> particles;
 
-  double getTime();
+  double getTime() const;
 
   Eigen::Vector3d acceleration(const Engine::Particle &particle);
   void limit(Engine::Particle &);
+  double calcSystemPotentionEnergy(const double&, const double&);
   double getSystemPotentialEnergy();
   double getSystemKineticEnergy();
   void update();
  private:
+  double SystemPotentialEnergy = 0;
+
   const nlohmann::json configs;
   const size_t kSeed_;
   const double dt_;
