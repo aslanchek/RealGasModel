@@ -7,7 +7,8 @@
 #include <random>
 #include <cmath>
 #include <nlohmann/json.hpp>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
+//#include <eigen3/Eigen/Dense>
 #include <cstdlib>
 #include <algorithm>
 
