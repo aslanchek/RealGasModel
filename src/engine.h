@@ -48,16 +48,16 @@ class Engine {
 
   Eigen::Vector3d acceleration(const Engine::Particle &particle);
   void limit(Engine::Particle &);
-  double calcSystemPotentionEnergy(const double&, const double&);
+  void calcSystemPotentialEnergy(const double&, const double&);
   double getSystemPotentialEnergy();
   double getSystemKineticEnergy();
   void update();
  private:
-  double SystemPotentialEnergy = 0;
-
   const nlohmann::json configs;
+  double systemPotentialEnergy_ = 0;
   const size_t kSeed_;
   const double dt_;
+  const int threads_;
   const size_t kCount_;
   const size_t kWSize_;
   const double kVelocity_;
