@@ -39,10 +39,10 @@ void Controller::run() {
       double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
       size_t remaining = ((size_t) configs["steps"] - i) * (elapsed / i);
       size_t h = remaining / 3600000;
-      size_t m = (remaining - h * 360000) / 60000;
-      size_t s = (remaining - h * 360000 - m * 60000) / 1000;
+      size_t m = (size_t)(remaining - h * 3600000) / 60000;
+      size_t s = (size_t)(remaining - h * 3600000 - m * 60000) / 1000;
  
-      printf("done %.1f%s rem %uh %um %us\n", done, "%", h, m, s);
+      printf("done %.1f%s rem %zuh %zum %zus\n", done, "%", h, m, s);
 
       log();
     }
