@@ -41,11 +41,8 @@ set(SOURCES
         src/engine.h
         src/engine.cpp
         src/logger.h
-        src/logger.cpp
-        src/visualisation.h
-        src/visualisation.cpp)
+        )
 
-set(EXTLIBS extlibs/rapidcsv.h)
 include_directories(extlibs/)
 
 add_executable(${EXECUTABLE_NAME} ${EXTLIBS} ${SOURCES})

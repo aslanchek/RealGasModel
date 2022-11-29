@@ -1,18 +1,42 @@
-#ifndef SFMLREALGASMODEL_SRC_LOGGER_H_
-#define SFMLREALGASMODEL_SRC_LOGGER_H_
-
+#include <fstream>
+#include <string>
 #include <vector>
-#include <rapidcsv.h>
-#include <fmt/core.h>
 
 class Logger {
  public:
-  Logger(std::string, const std::vector<std::string> &);
-  void log(const std::vector<double> &);
- private:
-  rapidcsv::Document data_;
-  std::string filename_;
-  uint64_t log_count_ = 0;
-};
+  Logger(std::string filename, const std::vector<const char *> &values) :
+      fout_(std::move(filename), std::fstream::out) {
+    fout_ << getCsvLine(values);
+  }
 
-#endif //SFMLREALGASMODEL_SRC_LOGGER_H_
+  template<typename T>
+  void log(const std::vector<T> &values) {
+    fout_ << getCsvLine(values);
+  }
+
+ private:
+  std::ofstream fout_;
+
+  uint64_t log_count_ = 0;
+
+  std::string get_str(const std::string &value) {
+    return value;
+  }
+
+  std::string get_str(const double &value) {
+    return std::to_string(value);
+  }
+
+  template<typename T>
+  std::string getCsvLine(const std::vector<T> &values) {
+    std::string str;
+    for (size_t i = 0; i < values.size(); ++i) {
+      str.append(get_str(values[i]));
+      if (i != values.size() - 1) {
+        str.push_back(',');
+      }
+    }
+    str.append("\n");
+    return str;
+  }
+};
