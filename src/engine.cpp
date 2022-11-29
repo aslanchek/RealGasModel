@@ -27,27 +27,13 @@ Engine::Engine(const nlohmann::json &configs) : configs(configs),
       double x = step;
       for (size_t m = 0; m != count; ++m) {
         particles.push_back(Particle(x, y, z, rand_vx(gen), rand_vy(gen),
-                                      rand_vz(gen), kmass_));
+                                     rand_vz(gen), kmass_));
         x += step;
       }
       y += step;
     }
     z += step;
   }
-
-//  double step = static_cast<double>(kWSize_) / (std::sqrt(kCount_) + 1);
-//
-//  int count = static_cast<int>(std::sqrt(kCount_));
-//
-//  double y = step;
-//  for (size_t k = 0; k != count; ++k) {
-//    double x = step;
-//    for (size_t m = 0; m != count; ++m) {
-//      particles.emplace_back(Particle(x, y, 0, rand_vx(gen), rand_vy(gen), 0, kmass_));
-//      x += step;
-//    }
-//    y += step;
-//  }
 }
 
 double Engine::getTime() const {
@@ -59,7 +45,9 @@ Eigen::Vector3d Engine::acceleration(const Engine::Particle &particle) {
   std::vector<Engine::Particle> particles_copy = particles;
 
   Eigen::Vector3d shift =
-      Eigen::Vector3d(static_cast<double>(kWSize_) / 2, static_cast<double>(kWSize_) / 2, static_cast<double>(kWSize_) / 2) - particle.position;
+      Eigen::Vector3d(static_cast<double>(kWSize_) / 2,
+                      static_cast<double>(kWSize_) / 2,
+                      static_cast<double>(kWSize_) / 2) - particle.position;
 
 #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles_copy.size(); ++i) {
@@ -110,7 +98,6 @@ double Engine::getSystemKineticEnergy() {
   }
   return sumKineticEnergy;
 }
-
 
 void Engine::update() {
 #pragma omp parallel for num_threads(threads_)
