@@ -4,12 +4,14 @@
 #include "engine.h"
 #include "logger.h"
 
+#include <fmt/core.h>
 #include <nlohmann/json.hpp>
 #include <chrono>
 
 class Controller {
  public:
   Controller();
+  std::string to_readable_time(const uint64_t&);
   void log();
   void update();
   void run();

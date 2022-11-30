@@ -31,24 +31,31 @@ void Controller::update() {
   engine.update();
 }
 
+std::string Controller::to_readable_time(const uint64_t &seconds) {
+  uint64_t h = seconds / 3600;
+  uint64_t m = (seconds - h * 3600) / 60;
+  uint64_t s = seconds - h * 3600 - m * 60;
+  std::string timestr = std::to_string(h) + "h " + std::to_string(m) + "m " + std::to_string(s) + "s";
+  return timestr;
+}
+
 void Controller::run() {
 
-  auto start = std::chrono::high_resolution_clock::now();
-  for (uint64_t i = 0; i < static_cast<uint64_t>(configs["steps"]); ++i) {
+  uint64_t STEPS = static_cast<int64_t>(configs["steps"]);
+  uint64_t log_step = static_cast<int64_t>(configs["log_step"]);
+
+  auto start = std::chrono::steady_clock::now();
+  for (int64_t i = 1; i < STEPS + 1; ++i) {
     update();
-    auto end = std::chrono::high_resolution_clock::now();
+    if (i % log_step == 0) { log(); }
+    auto end = std::chrono::steady_clock::now();
 
-    if (i % (size_t) configs["log_step"] == 0) {
-      double done = (double) i / (double) configs["steps"] * 100;
-      double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-      size_t remaining = ((size_t) configs["steps"] - i) * (elapsed / i);
-      size_t h = remaining / 3600000;
-      size_t m = (remaining - h * 3600000) / 60000;
-      size_t s = (remaining - h * 3600000 - m * 60000) / 1000;
+    if (i % log_step == 0) {
+      float done = static_cast<float>(i) / static_cast<float>(STEPS) * 100;
+      uint64_t elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+      uint64_t remaining = (static_cast<float>(elapsed) / static_cast<float>(i)) * static_cast<float>((STEPS - i));
 
-      printf("done %.1f%s rem %zuh %zum %zus\n", done, "%", h, m, s);
-
-      log();
+      fmt::print("done: {:.1f}% elpsd: {} rem: {}\n", done, to_readable_time(elapsed), to_readable_time(remaining));
     }
   }
 }
