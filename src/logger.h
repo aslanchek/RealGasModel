@@ -12,12 +12,11 @@ class Logger {
   template<typename T>
   void log(const std::vector<T> &values) {
     fout_ << getCsvLine(values);
+    fout_.flush();
   }
 
  private:
   std::ofstream fout_;
-
-  uint64_t log_count_ = 0;
 
   std::string get_str(const std::string &value) {
     return value;
