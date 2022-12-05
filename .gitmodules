@@ -10,3 +10,6 @@
 [submodule "extlibs/eigen"]
 	path = extlibs/eigen
 	url = https://gitlab.com/libeigen/eigen.git
+[submodule "extlibs/rapidcsv"]
+	path = extlibs/rapidcsv
+	url = git@github.com:d99kris/rapidcsv.git
