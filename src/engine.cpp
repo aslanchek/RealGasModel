@@ -26,7 +26,7 @@ Engine::Engine(const nlohmann::json &configs) : configs(configs),
     for (size_t k = 0; k != count; ++k) {
       double x = step;
       for (size_t m = 0; m != count; ++m) {
-        particles.push_back(Particle(x, y, z, rand_vx(gen), rand_vy(gen),
+        particles.emplace_back(Particle(x, y, z, rand_vx(gen), rand_vy(gen),
                                      rand_vz(gen), kmass_));
         x += step;
       }
