@@ -28,9 +28,9 @@ int main() {
     fout_ << "ITEM: TIMESTEP\n" << time_ << '\n';
     fout_ << "ITEM: NUMBER OF ATOMS\n" << particle_number_ << '\n';
     fout_ << "ITEM: BOX BOUNDS\n";
-    fout_ << 0 << " " << box_size_ << " " << 0 << '\n'; 
-    fout_ << 0 << " " << box_size_ << " " << 0 << '\n'; 
-    fout_ << 0 << " " << box_size_ << " " << 0 << '\n'; 
+    fout_ << 0 << " " << box_size_ << '\n'; 
+    fout_ << 0 << " " << box_size_ << '\n'; 
+    fout_ << 0 << " " << box_size_ << '\n'; 
     fout_ << "ITEM: ATOMS x y z\n";
 
     for (uint64_t n = 0; n < particle_number_; ++n) {
