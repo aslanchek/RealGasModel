@@ -15,7 +15,6 @@ int main() {
   const double dt_ = configs["dt"];
   const double timestep_ = dt_ * log_step_;
 
-
   std::string filename_ = "position_data.csv";
 
   rapidcsv::Document data_("../data/" + filename_);
@@ -28,20 +27,20 @@ int main() {
     fout_ << "ITEM: TIMESTEP\n" << time_ << '\n';
     fout_ << "ITEM: NUMBER OF ATOMS\n" << particle_number_ << '\n';
     fout_ << "ITEM: BOX BOUNDS\n";
-    fout_ << 0 << " " << box_size_ << '\n'; 
-    fout_ << 0 << " " << box_size_ << '\n'; 
-    fout_ << 0 << " " << box_size_ << '\n'; 
+    fout_ << 0 << " " << box_size_ << '\n';
+    fout_ << 0 << " " << box_size_ << '\n';
+    fout_ << 0 << " " << box_size_ << '\n';
     fout_ << "ITEM: ATOMS x y z\n";
 
     for (uint64_t n = 0; n < particle_number_; ++n) {
       try {
         std::vector<double> position = data_.GetRow<double>(index);
         fout_ << position[0] << ' ' << position[1] << ' ' << position[2] << '\n';
-      } catch(const std::out_of_range&) {
+        ++index;
+      } catch (const std::out_of_range &) {
         std::cerr << "csv parse error: out of range on " << std::to_string(index) << " row" << '\n';
         return EXIT_FAILURE;
       }
-      ++index;
     }
 
     fout_.flush();
