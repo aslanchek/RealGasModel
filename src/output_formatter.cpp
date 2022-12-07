@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 
 int main() {
-  const nlohmann::json configs = nlohmann::json::parse(std::ifstream("../src/conf.json"));
+  const nlohmann::json configs = nlohmann::json::parse(std::ifstream("../data/conf.json"));
 
   const uint64_t STEPS_ = configs["steps"];
   const uint64_t particle_number_ = configs["count"];

@@ -52,5 +52,3 @@ compile_commands.json
 build/*
 
 .idea/*
-
-data/*

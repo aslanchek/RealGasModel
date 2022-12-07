@@ -16,7 +16,7 @@ class Controller {
   void update();
   void run();
  private:
-  const nlohmann::json configs = nlohmann::json::parse(std::ifstream("../src/conf.json"));
+  const nlohmann::json configs = nlohmann::json::parse(std::ifstream("../data/conf.json"));
   Engine engine;
   Logger position_logger;
   Logger velocity_logger;
