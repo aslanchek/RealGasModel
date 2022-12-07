@@ -3,11 +3,13 @@
 Controller::Controller()
     : engine(configs),
       position_logger("../data/position_data.csv"),
+      absolute_position_logger("../data/absolute_position_data.csv"),
       velocity_logger("../data/velocity_data.csv"),
       energy_logger("../data/energy_data.csv", std::vector{"Time", "Kinetic Energy", "Potential Energy"}) {};
 
 void Controller::log() {
   std::vector<double> row_pos{};
+  std::vector<double> row_abs_pos{};
   std::vector<double> row_vel{};
   std::vector<double> row_energy{engine.getTime()};
 
@@ -19,11 +21,15 @@ void Controller::log() {
     for (int i = 0; i < 3; ++i) {
       row_vel.push_back(particle.velocity[i]);
       row_pos.push_back(particle.position[i]);
+      row_abs_pos.push_back(particle.position[i] + particle.transit[i] * 5);
     }
     position_logger.log(row_pos);
+    absolute_position_logger.log(row_abs_pos);
     velocity_logger.log(row_vel);
+
     row_vel.clear();
     row_pos.clear();
+    row_abs_pos.clear();
   }
 }
 
