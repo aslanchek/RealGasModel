@@ -4,6 +4,8 @@
 
 class Logger {
  public:
+  Logger(std::string filename) : fout_(std::move(filename), std::fstream::out) {};
+
   Logger(std::string filename, const std::vector<const char *> &values) :
       fout_(std::move(filename), std::fstream::out) {
     fout_ << getCsvLine(values);

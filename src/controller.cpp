@@ -2,8 +2,8 @@
 
 Controller::Controller()
     : engine(configs),
-      position_logger("../data/position_data.csv", std::vector{"x", "y", "z"}),
-      velocity_logger("../data/velocity_data.csv", std::vector{"Vx", "Vy", "Vz"}),
+      position_logger("../data/position_data.csv"),
+      velocity_logger("../data/velocity_data.csv"),
       energy_logger("../data/energy_data.csv", std::vector{"Time", "Kinetic Energy", "Potential Energy"}) {};
 
 void Controller::log() {
