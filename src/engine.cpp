@@ -49,14 +49,14 @@ Eigen::Vector3d Engine::acceleration(const Engine::Particle &particle) {
                       static_cast<double>(kWSize_) / 2,
                       static_cast<double>(kWSize_) / 2) - particle.position;
 
-#pragma omp parallel for num_threads(threads_)
+  #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles_copy.size(); ++i) {
     particles_copy[i].position += shift;
   }
 
-#pragma omp parallel for num_threads(threads_)
+  #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles_copy.size(); ++i) {
-    limit(particles_copy[i]);
+    limit(particles_copy[i], false);
   }
 
   for (auto &ext : particles_copy) {
@@ -77,9 +77,20 @@ Eigen::Vector3d Engine::acceleration(const Engine::Particle &particle) {
   return acceleration_sum;
 }
 
-void Engine::limit(Engine::Particle &particle) {
+void Engine::limit(Engine::Particle &particle, const bool& transit_check) {
   for (int i = 0; i != 3; ++i) {
-    particle.position[i] = std::abs(std::fmod(particle.position[i] + static_cast<double>(kWSize_), kWSize_));
+    if (particle.position[i] > kWSize_) {
+      particle.position[i] -= static_cast<double>(kWSize_);
+      if (transit_check) {
+        particle.transit[i] += 1;
+      }
+    }
+    if (particle.position[i] < 0) {
+      particle.position[i] += static_cast<double>(kWSize_);
+      if (transit_check) {
+        particle.transit[i] -= 1;
+      }
+    }
   }
 }
 
@@ -100,30 +111,37 @@ double Engine::getSystemKineticEnergy() {
 }
 
 void Engine::update() {
-#pragma omp parallel for num_threads(threads_)
-  for (int i = 0; i < particles.size(); i++) {
+  #pragma omp parallel for num_threads(threads_)
+  for (int i = 0; i < particles.size(); ++i) {
     particles[i].acceleration = acceleration(particles[i]);
   }
+
   systemPotentialEnergy_ = 0; // this is needed to systemPotentialEnergy_ not to be doubled
-#pragma omp parallel for num_threads(threads_)
-  for (auto &current : particles) {
-    current.position += current.velocity * dt_ + current.acceleration * (dt_ * dt_ / 2); //move
+                              //
+  #pragma omp parallel for num_threads(threads_)
+  for (int i = 0; i < particles.size(); ++i) {
+    particles[i].position += particles[i].velocity * dt_ + particles[i].acceleration * (dt_ * dt_ / 2); //move
   }
-#pragma omp parallel for num_threads(threads_)
-  for (auto &current : particles) {
-    limit(current);
+
+  #pragma omp parallel for num_threads(threads_)
+  for (int i = 0; i < particles.size(); ++i) {
+    limit(particles[i], true);
   }
-#pragma omp parallel for num_threads(threads_)
-  for (auto &current : particles) {
-    current.velocity += current.acceleration * dt_ / 2; //accelerate
+
+  #pragma omp parallel for num_threads(threads_)
+  for (int i = 0; i < particles.size(); ++i) {
+    particles[i].velocity += particles[i].acceleration * dt_ / 2; //accelerate
   }
-#pragma omp parallel for num_threads(threads_)
-  for (int i = 0; i < particles.size(); i++) {
+
+  //#pragma omp parallel for num_threads(threads_)
+  for (int i = 0; i < particles.size(); ++i) {
     particles[i].acceleration = acceleration(particles[i]);
   }
-#pragma omp parallel for num_threads(threads_)
-  for (auto &current : particles) {
-    current.velocity += current.acceleration * dt_ / 2; //accelerate
+
+  #pragma omp parallel for num_threads(threads_)
+  for (int i = 0; i < particles.size(); ++i) {
+    particles[i].velocity += particles[i].acceleration * dt_ / 2; //accelerate
   }
+
   time_ += dt_;
 }

@@ -22,6 +22,7 @@ class Engine {
     Eigen::Vector3d position;
     Eigen::Vector3d velocity;
     Eigen::Vector3d acceleration;
+    Eigen::Vector3d transit = {0, 0, 0};
 
     Particle(double x, double y, double z, double vx, double vy, double vz, double mass) :
         position(x, y, z), velocity(vx, vy, vz), mass(mass) {};
@@ -47,7 +48,7 @@ class Engine {
   double getTime() const;
 
   Eigen::Vector3d acceleration(const Engine::Particle &particle);
-  void limit(Engine::Particle &);
+  void limit(Engine::Particle &, const bool &);
   void calcSystemPotentialEnergy(const double&, const double&);
   double getSystemPotentialEnergy();
   double getSystemKineticEnergy();
