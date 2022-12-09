@@ -49,12 +49,12 @@ Eigen::Vector3d Engine::acceleration(const Engine::Particle &particle) {
                       static_cast<double>(kWSize_) / 2,
                       static_cast<double>(kWSize_) / 2) - particle.position;
 
-  #pragma omp parallel for num_threads(threads_)
+  //#pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles_copy.size(); ++i) {
     particles_copy[i].position += shift;
   }
 
-  #pragma omp parallel for num_threads(threads_)
+  //#pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles_copy.size(); ++i) {
     limit(particles_copy[i], false);
   }
@@ -111,24 +111,25 @@ double Engine::getSystemKineticEnergy() {
 }
 
 void Engine::update() {
-  #pragma omp parallel for num_threads(threads_)
-  for (int i = 0; i < particles.size(); ++i) {
-    particles[i].acceleration = acceleration(particles[i]);
+  if (time_ == 0) {
+    std::cout << "init\n";
+    #pragma omp parallel for num_threads(threads_)
+    for (int i = 0; i < particles.size(); ++i) {
+      particles[i].acceleration = acceleration(particles[i]);
+    }
   }
 
   systemPotentialEnergy_ = 0; // this is needed to systemPotentialEnergy_ not to be doubled
-                              //
-  #pragma omp parallel for num_threads(threads_)
+
+  //#pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles.size(); ++i) {
     particles[i].position += particles[i].velocity * dt_ + particles[i].acceleration * (dt_ * dt_ / 2); //move
   }
 
-  #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles.size(); ++i) {
     limit(particles[i], true);
   }
 
-  #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles.size(); ++i) {
     particles[i].velocity += particles[i].acceleration * dt_ / 2; //accelerate
   }
@@ -138,7 +139,6 @@ void Engine::update() {
     particles[i].acceleration = acceleration(particles[i]);
   }
 
-  #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles.size(); ++i) {
     particles[i].velocity += particles[i].acceleration * dt_ / 2; //accelerate
   }
