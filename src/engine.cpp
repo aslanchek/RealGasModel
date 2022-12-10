@@ -121,24 +121,27 @@ void Engine::update() {
 
   systemPotentialEnergy_ = 0; // this is needed to systemPotentialEnergy_ not to be doubled
 
-  //#pragma omp parallel for num_threads(threads_)
+  #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles.size(); ++i) {
     particles[i].position += particles[i].velocity * dt_ + particles[i].acceleration * (dt_ * dt_ / 2); //move
   }
 
+  #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles.size(); ++i) {
     limit(particles[i], true);
   }
 
+  #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles.size(); ++i) {
     particles[i].velocity += particles[i].acceleration * dt_ / 2; //accelerate
   }
 
-  //#pragma omp parallel for num_threads(threads_)
+  #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles.size(); ++i) {
     particles[i].acceleration = acceleration(particles[i]);
   }
 
+  #pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles.size(); ++i) {
     particles[i].velocity += particles[i].acceleration * dt_ / 2; //accelerate
   }

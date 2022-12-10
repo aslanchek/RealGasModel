@@ -15,7 +15,9 @@ int main() {
   const double dt_ = configs["dt"];
   const double timestep_ = dt_ * log_step_;
 
-  std::string filename_ = "position_data.csv";
+  std::string filename_;
+  std::cout << "Enter filename with positions for formatting for Ovito: ";
+  std::cin >> filename_;
 
   rapidcsv::Document data_("../data/" + filename_);
   std::ofstream fout_("../data/" + filename_ + ".lammps");
