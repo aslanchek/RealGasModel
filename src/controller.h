@@ -34,7 +34,7 @@ class Controller {
   /**
    * @brief     Move the steppable instances to the next step (e.g. Engine)
    */
-  void update()
+  void update();
 
   /**
    * @brief     Convinient run whole program (see main.cpp)

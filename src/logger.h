@@ -36,7 +36,7 @@ class Logger {
   std::ofstream fout_;
 
   /**
-   * @brie      to_string addition
+   * @brief     to_string addition
    * @returns   passed value converted to std::string
    */
   std::string get_str(const std::string &value) {
@@ -44,7 +44,7 @@ class Logger {
   }
 
   /**
-   * @brie      to_string addition  (overloaded)
+   * @brief     to_string addition  (overloaded)
    * @returns   passed value converted to std::string
    */
   std::string get_str(const double &value) {
