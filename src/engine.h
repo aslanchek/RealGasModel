@@ -45,7 +45,7 @@ class Engine {
      * @brief       Vector of transitions through borders
      *              Necessary to logging real position of
      *              current particle(excluding periodic boundary conditions) 
-     *              (mean squared displacement evaluation)
+     *              (mean squared displacement and self-diffusion coefficient evaluation)
      * @example     If partile x-position goes more than simulation box size,
      *              then transit get {1, 0, 0}. Similarly {-1, 0, 0} if it's less.
      */
