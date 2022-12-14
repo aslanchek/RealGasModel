@@ -1,24 +1,14 @@
 #include "engine.h"
 
-Engine::Engine(const nlohmann::json &configs) : configs(configs),
-                                                kSeed_(configs["seed"]),
-                                                dt_(configs["dt"]),
-                                                threads_(configs["num_threads"]),
-                                                kCount_(configs["count"]),
-                                                kWSize_(configs["simulation_side_size"]),
-                                                kVelocity_(configs["velocity"]),
-                                                kmass_(configs["mass"]),
-                                                sigma_(configs["sigma"]),
-                                                epsilon_(configs["epsilon"]),
-                                                klim_(configs["potential_limit"]) {
-  std::mt19937 gen(kSeed_);
-  std::uniform_real_distribution<double> rand_vx(-kVelocity_, kVelocity_);
-  std::uniform_real_distribution<double> rand_vy(-kVelocity_, kVelocity_);
-  std::uniform_real_distribution<double> rand_vz(-kVelocity_, kVelocity_);
+Engine::Engine(const nlohmann::json &configs) : configs(configs) {
+  std::mt19937 gen(kSeed);
+  std::uniform_real_distribution<double> rand_vx(-kVelocity, kVelocity);
+  std::uniform_real_distribution<double> rand_vy(-kVelocity, kVelocity);
+  std::uniform_real_distribution<double> rand_vz(-kVelocity, kVelocity);
 
-  double step = kWSize_ / (std::cbrt(kCount_) + 1);
+  double step = kBoxSize / (std::cbrt(kCount) + 1);
 
-  int count = static_cast<int>(std::cbrt(kCount_));
+  int count = static_cast<int>(std::cbrt(kCount));
 
   double z = step;
   for (size_t i = 0; i != count; ++i) {
@@ -26,47 +16,46 @@ Engine::Engine(const nlohmann::json &configs) : configs(configs),
     for (size_t k = 0; k != count; ++k) {
       double x = step;
       for (size_t m = 0; m != count; ++m) {
-        particles.emplace_back(Particle(x, y, z, rand_vx(gen), rand_vy(gen),
-                                     rand_vz(gen), kmass_));
+        particles_.push_back(Particle(x, y, z, rand_vx(gen), rand_vy(gen),
+                                         rand_vz(gen), kMass));
         x += step;
       }
       y += step;
     }
     z += step;
   }
+  int a = 0;
 }
 
-double Engine::getTime() const {
+double Engine::GetTime() const {
   return time_;
 }
 
-Eigen::Vector3d Engine::acceleration(const Engine::Particle &particle) {
+Eigen::Vector3d Engine::CalcAcceleration(const Engine::Particle &particle) {
   Eigen::Vector3d acceleration_sum(0, 0, 0);
-  std::vector<Engine::Particle> particles_copy = particles;
+  std::vector<Engine::Particle> particles_copy = particles_;
 
   Eigen::Vector3d shift =
-      Eigen::Vector3d(static_cast<double>(kWSize_) / 2,
-                      static_cast<double>(kWSize_) / 2,
-                      static_cast<double>(kWSize_) / 2) - particle.position;
+      Eigen::Vector3d(static_cast<double>(kBoxSize) / 2,
+                      static_cast<double>(kBoxSize) / 2,
+                      static_cast<double>(kBoxSize) / 2) - particle.position;
 
-  //#pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles_copy.size(); ++i) {
     particles_copy[i].position += shift;
   }
 
-  //#pragma omp parallel for num_threads(threads_)
   for (int i = 0; i < particles_copy.size(); ++i) {
-    limit(particles_copy[i], false);
+    PeriodicBoundaryCondLimit(particles_copy[i], false);
   }
 
   for (auto &ext : particles_copy) {
     Eigen::Vector3d distance = ext.position - (particle.position + shift);
-    if (distance.norm() < klim_ && distance.norm() > 0) {
+    if (distance.norm() < kPotentialCut && distance.norm() > 0) {
 
-      double part1 = k1_ / std::pow(distance.norm(), 12);
-      double part2 = k2_ / std::pow(distance.norm(), 6);
+      double part1 = k1 / std::pow(distance.norm(), 12);
+      double part2 = k2 / std::pow(distance.norm(), 6);
 
-      calcSystemPotentialEnergy(part1, part2);
+      CalcSystemPotentialEnergy(part1, part2);
 
       double acceleration_abs =
           -(12 * part1 / distance.norm() - 6 * part2 / distance.norm()) / particle.mass;
@@ -77,16 +66,16 @@ Eigen::Vector3d Engine::acceleration(const Engine::Particle &particle) {
   return acceleration_sum;
 }
 
-void Engine::limit(Engine::Particle &particle, const bool& transit_check) {
+void Engine::PeriodicBoundaryCondLimit(Engine::Particle &particle, const bool &transit_check) {
   for (int i = 0; i != 3; ++i) {
-    if (particle.position[i] > kWSize_) {
-      particle.position[i] -= static_cast<double>(kWSize_);
+    if (particle.position[i] > kBoxSize) {
+      particle.position[i] -= static_cast<double>(kBoxSize);
       if (transit_check) {
         particle.transit[i] += 1;
       }
     }
     if (particle.position[i] < 0) {
-      particle.position[i] += static_cast<double>(kWSize_);
+      particle.position[i] += static_cast<double>(kBoxSize);
       if (transit_check) {
         particle.transit[i] -= 1;
       }
@@ -94,57 +83,51 @@ void Engine::limit(Engine::Particle &particle, const bool& transit_check) {
   }
 }
 
-void Engine::calcSystemPotentialEnergy(const double &part1, const double &part2) {
-  systemPotentialEnergy_ += part1 - part2;
+void Engine::CalcSystemPotentialEnergy(const double &part1, const double &part2) {
+  system_potential_energy_ += part1 - part2;
 }
 
-double Engine::getSystemPotentialEnergy() {
-  return systemPotentialEnergy_ / 2;
+double Engine::GetSystemPotentialEnergy() {
+  return system_potential_energy_ / 2;
 }
 
-double Engine::getSystemKineticEnergy() {
+double Engine::GetSystemKineticEnergy() {
   double sumKineticEnergy = 0;
-  for (size_t i = 0; i != kCount_; ++i) {
-    sumKineticEnergy += particles[i].getKineticEnegry();
+  for (size_t i = 0; i != kCount; ++i) {
+    sumKineticEnergy += particles_[i].GetKineticEnergy();
   }
   return sumKineticEnergy;
 }
 
-void Engine::update() {
+void Engine::Update() {
   if (time_ == 0) {
-    std::cout << "init\n";
-    #pragma omp parallel for num_threads(threads_)
-    for (int i = 0; i < particles.size(); ++i) {
-      particles[i].acceleration = acceleration(particles[i]);
+    std::cout << "init acceleration calc\n";
+    for (int i = 0; i < particles_.size(); ++i) {
+      particles_[i].acceleration = CalcAcceleration(particles_[i]);
     }
   }
 
-  systemPotentialEnergy_ = 0; // this is needed to systemPotentialEnergy_ not to be doubled
+  system_potential_energy_ = 0; // this is needed to system potential energy not to be doubled
 
-  #pragma omp parallel for num_threads(threads_)
-  for (int i = 0; i < particles.size(); ++i) {
-    particles[i].position += particles[i].velocity * dt_ + particles[i].acceleration * (dt_ * dt_ / 2); //move
+  for (int i = 0; i < particles_.size(); ++i) {
+    particles_[i].position += particles_[i].velocity * dt + particles_[i].acceleration * (dt * dt / 2); //move
   }
 
-  #pragma omp parallel for num_threads(threads_)
-  for (int i = 0; i < particles.size(); ++i) {
-    limit(particles[i], true);
+  for (int i = 0; i < particles_.size(); ++i) {
+    PeriodicBoundaryCondLimit(particles_[i], true);
   }
 
-  #pragma omp parallel for num_threads(threads_)
-  for (int i = 0; i < particles.size(); ++i) {
-    particles[i].velocity += particles[i].acceleration * dt_ / 2; //accelerate
+  for (int i = 0; i < particles_.size(); ++i) {
+    particles_[i].velocity += particles_[i].acceleration * dt / 2; //accelerate
   }
 
-  #pragma omp parallel for num_threads(threads_)
-  for (int i = 0; i < particles.size(); ++i) {
-    particles[i].acceleration = acceleration(particles[i]);
+  for (int i = 0; i < particles_.size(); ++i) {
+    particles_[i].acceleration = CalcAcceleration(particles_[i]);
   }
 
-  #pragma omp parallel for num_threads(threads_)
-  for (int i = 0; i < particles.size(); ++i) {
-    particles[i].velocity += particles[i].acceleration * dt_ / 2; //accelerate
+  for (int i = 0; i < particles_.size(); ++i) {
+    particles_[i].velocity += particles_[i].acceleration * dt / 2; //accelerate
   }
 
-  time_ += dt_;
+  time_ += dt;
 }

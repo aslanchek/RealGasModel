@@ -18,26 +18,26 @@
 class Engine {
  public:
   /**
-   * @brief     Particle(molecula) class implementation
+   * @brief     Particle(molecule) class implementation
    */
   struct Particle {
     /**
-     * @brief     Mass of current molecula
+     * @brief     Mass of current molecule
      */
     double mass;
 
     /**
-     * @brief     Position componets vector of current partilce [x, y, z]
+     * @brief     Position components vector of current particle [x, y, z]
      */
     Eigen::Vector3d position;
 
     /**
-     * @brief     Velocity componets vector of current partilce [Vx, Vy, Vz]
+     * @brief     Velocity components vector of current particle [Vx, Vy, Vz]
      */
     Eigen::Vector3d velocity;
 
     /**
-     * @brief     Acceleration componets vector of current partilce [ax, ay, az]
+     * @brief     Acceleration components vector of current particle [ax, ay, az]
      */
     Eigen::Vector3d acceleration;
 
@@ -46,7 +46,7 @@ class Engine {
      *              Necessary to logging real position of
      *              current particle(excluding periodic boundary conditions) 
      *              (mean squared displacement and self-diffusion coefficient evaluation)
-     * @example     If partile x-position goes more than simulation box size,
+     * @example     If particle x-position goes more than simulation box size,
      *              then transit get {1, 0, 0}. Similarly {-1, 0, 0} if it's less.
      */
     Eigen::Vector3d transit = {0, 0, 0};
@@ -68,56 +68,60 @@ class Engine {
     }
 
     /**
-     * @brief       Kinetic Enegry logging 
+     * @brief       Kinetic Energy logging
      * @returns     Kinetic Energy of current particle
      */
-    double getKineticEnegry() {
+    double GetKineticEnergy() {
       return mass * std::pow(velocity.norm(), 2) / 2;
     }
   };
 
-  Engine(const nlohmann::json &);
+  /**
+   * @brief     Constructor
+   * @param     configs       nlohmann::json instance containing configuration options
+   */
+  explicit Engine(const nlohmann::json & configs);
 
   /**
    * @brief     std::vector of particles
    */
-  std::vector<Particle> particles;
+  std::vector<Particle> particles_;
 
   /**
    * @brief       Get passed simulation time
    * @returns     Passed time
    */
-  double getTime() const;
+  [[nodiscard]] double GetTime() const;
 
   /**
    * @brief
    */
-  Eigen::Vector3d acceleration(const Engine::Particle &particle);
+  Eigen::Vector3d CalcAcceleration(const Engine::Particle &particle);
 
   /**
    * @brief
    */
-  void limit(Engine::Particle &, const bool &);
+  void PeriodicBoundaryCondLimit(Engine::Particle & particle, const bool & transit_check);
 
   /**
    * @brief
    */
-  void calcSystemPotentialEnergy(const double&, const double&);
+  void CalcSystemPotentialEnergy(const double&, const double&);
 
   /**
    * @brief
    */
-  double getSystemPotentialEnergy();
+  double GetSystemPotentialEnergy();
 
   /**
    * @brief
    */
-  double getSystemKineticEnergy();
+  double GetSystemKineticEnergy();
 
   /**
-   * @brief
+   * @brief     Velocity Verlet integration method implementation (see Wikipedia)
    */
-  void update();
+  void Update();
  private:
   /**
    * @brief
@@ -127,63 +131,63 @@ class Engine {
   /**
    * @brief
    */
-  double systemPotentialEnergy_ = 0;
+  double system_potential_energy_ = 0;
 
   /**
    * @brief
    */
-  const size_t kSeed_;
+  const size_t kSeed = configs["seed"];
 
   /**
    * @brief
    */
-  const double dt_;
+  const double dt = configs["dt"];
 
   /**
    * @brief
    */
-  const int threads_;
+  const int kThreads = configs["num_threads"];
 
   /**
    * @brief   Number of particles
    */
-  const size_t kCount_;
+  const size_t kCount = configs["count"];
 
   /**
    * @brief     Size of simulation box
    */
-  const size_t kWSize_;
+  const size_t kBoxSize = configs["simulation_box_size"];
 
   /**
    * @brief     Max velocity projection
    */
-  const double kVelocity_;
+  const double kVelocity = configs["velocity"];
   
   /**
    * @brief   Mass of all particles
    */
-  const double kmass_; 
+  const double kMass = configs["mass"];
 
   /**
    * @brief LJ constant
    */
-  const double sigma_;
+  const double kSigma = configs["sigma"];
 
   /**
    * @brief LJ constant
    */
-  const double epsilon_;
+  const double kEpsilon = configs["epsilon"];
 
   /**
    * @brief LJ constant
    */
-  const double klim_;
+  const double kPotentialCut = configs["potential_cut"];
 
-  const double k1_ = 4 * epsilon_ * std::pow(sigma_, 12);
-  const double k2_ = 4 * epsilon_ * std::pow(sigma_, 6);
+  const double k1 = 4 * kEpsilon * std::pow(kSigma, 12);
+  const double k2 = 4 * kEpsilon * std::pow(kSigma, 6);
 
   /**
-   * @brief Passed sumulation time
+   * @brief Passed simulation time
    */
   double time_ = 0;
 };

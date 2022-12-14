@@ -2,5 +2,5 @@
 
 int main() {
   Controller controller;
-  controller.run();
+  controller.Run();
 }
