@@ -47,6 +47,10 @@ This project contains
 * [Velocity Verlet algorithm](https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet)
 * [OpenMP](https://www.openmp.org/)
 
+## Results
+
+See report_RU.pdf for more details.
+
 ## References:
 * [Transport coefficients of the Lennard-Jones model fluid. II Self-diffusion](https://aip.scitation.org/doi/pdf/10.1063/1.1786579)
 * [Self‐Diffusion in Argon](https://aip.scitation.org/doi/pdf/10.1063/1.1747116)
