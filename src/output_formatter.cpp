@@ -5,18 +5,23 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 
+/**
+ * @brief   Coverts csv data to the lammps dump format to visualization using OVITO
+ * @param   Filename in csv (e.g. position_data.csv -> position_data.csv.lammps)
+ */
+
 int main() {
   const nlohmann::json configs = nlohmann::json::parse(std::ifstream("../data/conf.json"));
 
   const uint64_t STEPS_ = configs["steps"];
   const uint64_t particle_number_ = configs["count"];
   const uint64_t log_step_ = configs["log_step"];
-  const uint64_t box_size_ = configs["simulation_side_size"];
+  const uint64_t box_size_ = configs["simulation_box_size"];
   const double dt_ = configs["dt"];
   const double timestep_ = dt_ * log_step_;
 
   std::string filename_;
-  std::cout << "Enter filename with positions for formatting for Ovito: ";
+  std::cout << "Enter filename with positions for formatting for Ovito lammps dump: ";
   std::cin >> filename_;
 
   rapidcsv::Document data_("../data/" + filename_);
