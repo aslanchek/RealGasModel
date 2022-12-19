@@ -4,6 +4,7 @@
 
 /**
  * @brief   Logger class implementation
+ *          Needed to save passed data to .csv file
  */
 class Logger {
  public:
@@ -25,6 +26,8 @@ class Logger {
 
   /**
    * @brief     Write value into corresponding file
+   * @tparam    T           the type of value to be logged into .csv file
+   * @param     values      std::vector of logging values
    */
   template<typename T>
   void log(const std::vector<T> &values) {
@@ -53,6 +56,7 @@ class Logger {
 
   /**
    * @brief       Returns csv line by vector of values provided
+   * @tparam      T           the type of data to be converted into std::string and then into csv format
    * @param       values      std::vector of values to be logged
    * @returns     std::string of passed values converted into .csv format
    */

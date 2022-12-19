@@ -13,7 +13,11 @@
 #include <omp.h>
 
 /**
- * @brief     Engine class implementation for Lennard-Jones fluid modeling
+ * Engine class implementation for Lennard-Jones fluid modeling;
+ * Contains Paricle class definition. It stores particles in std::vector,
+ * it can calculate current acceleration of each particle uses Lennard-Jones interaction between particles.
+ * Update() method implements Velocity Verlet integration to update positions and velocities of each particle.
+ * There are several 
  */
 class Engine {
  public:
@@ -83,7 +87,7 @@ class Engine {
   explicit Engine(const nlohmann::json & configs);
 
   /**
-   * @brief     std::vector of particles
+   * @brief       std::vector of particles
    */
   std::vector<Particle> particles_;
 
@@ -94,27 +98,30 @@ class Engine {
   [[nodiscard]] double GetTime() const;
 
   /**
-   * @brief
+   * @brief       Calculates acceleration using Lennard-Jones interaction
+   * @returns     3d vector of acceleration from each other particles
    */
   Eigen::Vector3d CalcAcceleration(const Engine::Particle &particle);
 
   /**
-   * @brief
+   * @brief     Applies periodic boundary conditions to the passed particle
+   * @param     particle
+   * @param     transit_check     bool: true if it should log transitions through bounds
    */
   void PeriodicBoundaryCondLimit(Engine::Particle & particle, const bool & transit_check);
 
   /**
-   * @brief
+   * @brief     adds the Lennard-Jones equations parts to the system_potential_energy_
    */
   void CalcSystemPotentialEnergy(const double&, const double&);
 
   /**
-   * @brief
+   * @returns   system_potential_energy_ (Total Potential energy of system)
    */
   double GetSystemPotentialEnergy();
 
   /**
-   * @brief
+   * @returns   Total Kinetic energy
    */
   double GetSystemKineticEnergy();
 
@@ -124,32 +131,38 @@ class Engine {
   void Update();
  private:
   /**
-   * @brief
+   * @brief     JSON configuration file
    */
   const nlohmann::json configs;
 
   /**
-   * @brief
+   * @brief     Summary potential energy
    */
   double system_potential_energy_ = 0;
 
   /**
-   * @brief
+   * @brief Passed simulation time
+   */
+  double time_ = 0;
+
+  /**
+   * @brief     Seed for velocity random generation 
+   *            using uniform distribution
    */
   const size_t kSeed = configs["seed"];
 
   /**
-   * @brief
+   * @brief     Time step
    */
   const double dt = configs["dt"];
 
   /**
-   * @brief
+   * @brief     Number of threads for multithreading
    */
   const int kThreads = configs["num_threads"];
 
   /**
-   * @brief   Number of particles
+   * @brief     Number of particles
    */
   const size_t kCount = configs["count"];
 
@@ -164,31 +177,31 @@ class Engine {
   const double kVelocity = configs["velocity"];
   
   /**
-   * @brief   Mass of all particles
+   * @brief     Mass of all particles
    */
   const double kMass = configs["mass"];
 
   /**
-   * @brief LJ constant
+   * @brief     LJ constant
+   *            the distance at which the particle-particle potential energy is zero
    */
   const double kSigma = configs["sigma"];
 
   /**
-   * @brief LJ constant
+   * @brief     LJ constant: 
+   *            the depth of the potential well
    */
   const double kEpsilon = configs["epsilon"];
 
   /**
-   * @brief LJ constant
+   * @brief     LJ constant: 
+   *            cut-off distance at which the particle-particle 
+   *            potential energy is considered to be zero
    */
   const double kPotentialCut = configs["potential_cut"];
 
   const double k1 = 4 * kEpsilon * std::pow(kSigma, 12);
   const double k2 = 4 * kEpsilon * std::pow(kSigma, 6);
 
-  /**
-   * @brief Passed simulation time
-   */
-  double time_ = 0;
 };
 #endif // ENGINE_H
