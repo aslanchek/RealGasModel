@@ -100,6 +100,7 @@ double Engine::GetSystemKineticEnergy() {
 }
 
 void Engine::Update() {
+  // calculate acceleration for each particle at the first time
   if (time_ == 0) {
     std::cout << "init acceleration calc\n";
     for (int i = 0; i < particles_.size(); ++i) {
@@ -121,6 +122,7 @@ void Engine::Update() {
     particles_[i].velocity += particles_[i].acceleration * dt / 2; //accelerate
   }
 
+  #pragma omp parallel for num_threads(kThreads)
   for (int i = 0; i < particles_.size(); ++i) {
     particles_[i].acceleration = CalcAcceleration(particles_[i]);
   }
