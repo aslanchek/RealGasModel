@@ -22,6 +22,8 @@ Requirements:
 * nlohmann/json
 * fmt
 * rapigcsv
+
+Note: use `git --recurse-submodules` to downloads submodules (see extlibs/)
  
 ## Building:
 
