@@ -1,10 +1,11 @@
 # Molecular Dynamic simulation of Lennard-Jones gas engine.
 
 Visualization for 961 particles distibuted on the plane:
+
+Red particle represents Brownian motion.
 <p>
     <img src="https://github.com/aslanchek/RealGasModel/blob/master/animation.gif">
 </p>
-Red particle represents Brownian motion.
 
 3D visualization using Ovito:
 <p>
@@ -23,9 +24,9 @@ Requirements:
 * fmt
 * rapigcsv
 
-Note: use `git --recurse-submodules` to downloads submodules (see extlibs/)
+Note: use `git --recurse-submodules` to download submodules (see extlibs/)
  
-## Building:
+### Building
 
 * Create and change working directory to build directory: `mkdir build && cd build`.
 * Build on Linux: `cmake .. && cmake --build .`. It will build all required dependencies and the project itself.
@@ -33,7 +34,7 @@ Note: use `git --recurse-submodules` to downloads submodules (see extlibs/)
 Default simulation parameters, Lennard-Jones properties, etc. can be modified in data/conf.json.
 All executable files will be placed in `build/` directory.
 
-## Running and Usage:
+## Running and Usage
 * Run simulation: `./calc.exe`. It will save all simulation output data in `data/` directory.
 * Run output formatter: `./output_format.exe`. You will be asked to specify filenames to format (e.g. `position_data.csv`, `absolute_position_data.csv`). It will format all output data in `data/` directory and save it with `.lammps` extension.
 * Use OVITO to get 3D visualization: `File -> Load File -> <Auto-detect file format>(*)` and select formatted output file with extension `.lammps`.
