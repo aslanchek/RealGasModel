@@ -32,7 +32,10 @@ double Engine::GetTime() const {
 }
 
 Eigen::Vector3d Engine::CalcAcceleration(const Engine::Particle &particle) {
-  Eigen::Vector3d acceleration_sum(0, 0, 0);
+  double acc_sum_x = 0;
+  double acc_sum_y = 0;
+  double acc_sum_z = 0;
+
   std::vector<Engine::Particle> particles_copy = particles_;
 
   Eigen::Vector3d shift =
@@ -40,29 +43,33 @@ Eigen::Vector3d Engine::CalcAcceleration(const Engine::Particle &particle) {
                       static_cast<double>(kBoxSize) / 2,
                       static_cast<double>(kBoxSize) / 2) - particle.position;
 
+  #pragma omp parallel for num_threads(kThreads) shared(particles_copy, shift)
   for (int i = 0; i < particles_copy.size(); ++i) {
     particles_copy[i].position += shift;
   }
 
+  #pragma omp parallel for num_threads(kThreads) shared(particles_copy)
   for (int i = 0; i < particles_copy.size(); ++i) {
     PeriodicBoundaryCondLimit(particles_copy[i], false);
   }
 
-  for (auto &ext : particles_copy) {
-    Eigen::Vector3d distance = ext.position - (particle.position + shift);
-    if (distance.norm() < kPotentialCut && distance.norm() > 0) {
-
-      double part1 = k1 / std::pow(distance.norm(), 12);
-      double part2 = k2 / std::pow(distance.norm(), 6);
-
-      CalcSystemPotentialEnergy(part1, part2);
+  #pragma omp parallel for num_threads(kThreads) shared(particles_copy, particle) reduction(+: acc_sum_x, acc_sum_y, acc_sum_z) 
+  for (int i = 0; i < particles_copy.size(); ++i) {
+    Eigen::Vector3d distance = particles_copy[i].position - (particle.position + shift);                      // расстояние между частицами
+    if (distance.norm() < kPotentialCut && distance.norm() > 0) {                                             // проверка обрезания потенциала
 
       double acceleration_abs =
-          -(12 * part1 / distance.norm() - 6 * part2 / distance.norm()) / particle.mass;
+          -(12 * k1 / std::pow(distance.norm(), 13) - 6 * k2 / std::pow(distance.norm(), 7)) / particle.mass; // вычисление ускорения 
+
       distance.normalize();
-      acceleration_sum += distance * acceleration_abs;
+      Eigen::Vector3d acc_sum_vec = distance * acceleration_abs;
+      acc_sum_x += acc_sum_vec[0];
+      acc_sum_y += acc_sum_vec[1];
+      acc_sum_z += acc_sum_vec[2];
     }
   }
+
+  Eigen::Vector3d acceleration_sum(acc_sum_x, acc_sum_y, acc_sum_z);
   return acceleration_sum;
 }
 
@@ -88,7 +95,9 @@ void Engine::CalcSystemPotentialEnergy(const double &part1, const double &part2)
 }
 
 double Engine::GetSystemPotentialEnergy() {
-  return system_potential_energy_ / 2;
+  //TODO: сделать пробег по всем частицам и посчитать суммарную энергию взаимодействия
+  //      можно использовать OpenMP pragma, но нужно не забыть про data races
+  return 0;
 }
 
 double Engine::GetSystemKineticEnergy() {
@@ -100,7 +109,7 @@ double Engine::GetSystemKineticEnergy() {
 }
 
 void Engine::Update() {
-  // calculate acceleration for each particle at the first time
+  // calculates acceleration for each particle at the first time
   if (time_ == 0) {
     std::cout << "init acceleration calc\n";
     for (int i = 0; i < particles_.size(); ++i) {
@@ -108,27 +117,29 @@ void Engine::Update() {
     }
   }
 
-  system_potential_energy_ = 0; // this is needed to system potential energy not to be doubled
-
+  // updates position for each particle
   for (int i = 0; i < particles_.size(); ++i) {
     particles_[i].position += particles_[i].velocity * dt + particles_[i].acceleration * (dt * dt / 2); //move
   }
 
+  // checks if partile has not gone beyond the boundaries
   for (int i = 0; i < particles_.size(); ++i) {
     PeriodicBoundaryCondLimit(particles_[i], true);
   }
 
+  // updates velocity for each particle
   for (int i = 0; i < particles_.size(); ++i) {
-    particles_[i].velocity += particles_[i].acceleration * dt / 2; //accelerate
+    particles_[i].velocity += particles_[i].acceleration * dt / 2;
   }
 
-  #pragma omp parallel for num_threads(kThreads)
+  // updates acceleration for each particle
   for (int i = 0; i < particles_.size(); ++i) {
     particles_[i].acceleration = CalcAcceleration(particles_[i]);
   }
 
+  // updates velocity for each particle
   for (int i = 0; i < particles_.size(); ++i) {
-    particles_[i].velocity += particles_[i].acceleration * dt / 2; //accelerate
+    particles_[i].velocity += particles_[i].acceleration * dt / 2;
   }
 
   time_ += dt;
